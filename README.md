@@ -1,6 +1,6 @@
 # SynthV2 Bottles Setup
 
-Sets up Synthesizer V Studio 2 Pro and/or Instrument X in a dedicated Bottles wine bottle on Linux, including the WebView2 downgrade the login flow requires and a URL scheme handler for browser-based authentication.
+Sets up Synthesizer V Studio 2 Pro and/or Instrument X in a dedicated Bottles wine bottle on Linux, including the WebView2 downgrade that the various SVS2 menus rely on and a URL scheme handler for browser-based authentication.
 
 ## What the script does
 
@@ -13,7 +13,7 @@ Sets up Synthesizer V Studio 2 Pro and/or Instrument X in a dedicated Bottles wi
 7. Writes a handler script and a `.desktop` file that registers the `dreamtonics-svstudio2://` URL scheme, so the app's browser-based login can hand control back to it.
 8. Registers the new desktop entry with `update-desktop-database`.
 
-The final step, logging in, is up to you. Launch Synthesizer V Studio 2 Pro and/or Instrument X, click Log In, and complete authentication in the browser. If the desktop handler doesn't pick up the redirect, point it to the script instead, although in my testing on Fedora w/ GNOME and CachyOS w/ KDE that wasn't necessary.
+The final step, logging in, is up to you. Launch Synthesizer V Studio 2 Pro and/or Instrument X, click Log In, and complete authentication in the browser. If the desktop handler doesn't pick up the redirect, point it to the script instead, although in my testing on Fedora w/ GNOME and CachyOS w/ KDE that wasn't necessary. If setting up SVS2, don't forget to set your bottle's windows version to 7 otherwise some configuration panels won't work (welcome screen, settings, voice manager - although you do not need it to download voices you own)
 
 ## Requirements
 
@@ -22,7 +22,7 @@ Install these with your distro's package manager before running:
 - `flatpak`
 - `wget`
 - `tar`
-- `python3`
+- `python3` (for Bottles)
 - `update-desktop-database` (part of `desktop-file-utils` on most distros)
 - `cabextract`
 
@@ -36,7 +36,9 @@ You'll also need the Synthesizer V Studio 2 Pro and/or Instrument X installer `.
 
 Without the argument the script prompts for the path.
 
-If the installer lives outside `$HOME`, the script warns you: once filesystem access is scoped to `$HOME` in step 2, Bottles can no longer reach files elsewhere. Move the installer under `$HOME` first, or confirm you understand the risk when prompted.
+This is only applicable to SVS2, the script will prompt you for InstX installer if you want to install it.
+
+If the installer is outside `$HOME`, the script warns you: once filesystem access is scoped to `$HOME` in step 2, Bottles can no longer reach files elsewhere. Move the installer under `$HOME` first, or confirm you understand the risk when prompted.
 
 ## What's automated versus manual
 
@@ -44,13 +46,13 @@ The script handles bottle creation, runner selection, dependency detection, and 
 
 - **Dependency installation** (step 4): Bottles' CLI has no command for installing dependencies like `dotnet45`. The script opens the Bottles GUI, waits for you to install both dependencies or close the window, then checks `bottle.yml` to confirm they landed. If either is missing, it asks you to try again.
 - **Synthesizer V installation** (step 5): same pattern. The installer runs inside the bottle; you click through the wizard; the script verifies the resulting executable exists.
-- **Login** (final step): opening the browser and authenticating is entirely on you. The script sets up the handler that lets the browser redirect back into the app, but can't complete the login itself.
+- **Login** (final step): opening the browser and authenticating is entirely on you. The script sets up the handler that lets the browser redirect back into the app, but can't complete the login itself. As such, the script exits without confirming the login - it literally can't.
 
 All the other steps include a completion check before the script moves on. If a step fails, the script stops and tells you which check failed, rather than continuing on a broken bottle.
 
 ## Design notes
 
-**Idempotency.** Each major step checks whether its target already exists before doing anything: bottle directory, dependency list in `bottle.yml`, `synthv-studio.exe`, the target WebView2 version. Run the script twice and the second run skips everything already done.
+**Idempotency.** Each major step checks whether its target already exists before doing anything: bottle directory, dependency list in `bottle.yml`, `synthv-studio.exe`, the target WebView2 version. Run the script twice and the second run skips everything already done. The only part that isn't checked for is WebView2 downgrade.
 
 **No hardcoded package manager.** The script checks for required tools with `command -v` and stops with a clear error if one is missing. It doesn't call `apt`, `pacman`, or `dnf` on your behalf. Install the missing tool through your own distro's package manager and rerun.
 
@@ -58,7 +60,7 @@ All the other steps include a completion check before the script moves on. If a 
 
 ## Known limitations
 
-- The `bottles-cli edit --win win7` call (step 7) does not work, otherwise the step of changing the windows version could have been automated. Win7 setting is required for WebView2 windows to render in SVS2 - this problem does not exist in Instrument X.
+- The `bottles-cli edit --win win7` call does not work, otherwise the step of changing the windows version could have been automated. Win7 setting is required for WebView2 windows to render in SVS2 - this problem does not exist in Instrument X.
 - Runner discovery scrapes the GitHub component listing page rather than calling the API, to avoid the unauthenticated API's low rate limit. If GitHub changes that page's markup, the scrape may need updating.
 - The script assumes the westinyang WebView2 archive continues shipping `.cab` format releases at the URL pattern it currently uses. If the repository goes down, the script won't be able to downgrade WebView2
 
