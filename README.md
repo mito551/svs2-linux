@@ -8,7 +8,7 @@ Sets up Synthesizer V Studio 2 Pro and/or Instrument X in a dedicated Bottles wi
 2. Grants Bottles filesystem access under `$HOME` via `flatpak override`.
 3. Finds the latest `kron4ek-*-staging-tkg` wine runner, downloads it, and creates a bottle named `SynthV2`.
 4. Opens Bottles so you can install the `dotnet45` and `webview2` dependencies through the GUI. The script polls `bottle.yml` and confirms both are present before continuing.
-Besides installing dependencies, enable `dxvk` and `NTSync` in the bottle properties.
+Besides installing dependencies, you have to manually enable `dxvk` and `NTSync` in the bottle properties.
 5. Runs your Synthesizer V Studio 2 Pro and/or Instrument X installer inside the bottle. You complete the install wizard; the script confirms `synthv-studio.exe` exists afterward.
 6. Downloads the WebView2 92.0.902.73 fixed-version runtime, extracts it with `cabextract`, and replaces the bottle's default WebView2 version with it.
 7. Writes a handler script and a `.desktop` file that registers the `dreamtonics-svstudio2://` URL scheme, so the app's browser-based login can hand control back to it.
